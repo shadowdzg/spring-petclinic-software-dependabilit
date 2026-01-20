@@ -78,6 +78,13 @@ public class Pet extends NamedEntity {
 		return this.visits;
 	}
 
+	/**
+	 * Adds a visit to this pet's visit collection.
+	 * @param visit the visit to add, must not be null
+	 */
+	// @ requires visit != null;
+	// @ ensures getVisits().contains(visit);
+	// @ ensures getVisits().size() == \old(getVisits().size()) + 1;
 	public void addVisit(Visit visit) {
 		getVisits().add(visit);
 	}

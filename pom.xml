@@ -115,6 +115,16 @@
       <scope>runtime</scope>
     </dependency>
 
+    <!-- VULNERABILITY: Using Components with Known Vulnerabilities (OWASP A9) -->
+    <!-- This is an old version of Apache Commons Collections with known CVEs -->
+    <!-- CVE-2015-6420, CVE-2017-15708: Remote code execution vulnerabilities -->
+    <!-- In production, this should be updated to version 4.4 or later -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-collections4</artifactId>
+      <version>4.0</version>
+    </dependency>
+
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-devtools</artifactId>
@@ -281,6 +291,43 @@
           <failOnUnableToExtractRepoInfo>false</failOnUnableToExtractRepoInfo>
         </configuration>
       </plugin>
+
+      <!-- PiTest Mutation Testing Plugin -->
+      <plugin>
+        <groupId>org.pitest</groupId>
+        <artifactId>pitest-maven</artifactId>
+        <version>1.17.1</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-junit5-plugin</artifactId>
+            <version>1.2.1</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <targetClasses>
+            <param>org.springframework.samples.petclinic.*</param>
+          </targetClasses>
+          <targetTests>
+            <param>org.springframework.samples.petclinic.*</param>
+          </targetTests>
+          <excludedClasses>
+            <param>org.springframework.samples.petclinic.PetClinicApplication</param>
+            <param>org.springframework.samples.petclinic.PetClinicRuntimeHints</param>
+            <param>org.springframework.samples.petclinic.system.CacheConfiguration</param>
+            <param>org.springframework.samples.petclinic.system.WebConfiguration</param>
+          </excludedClasses>
+          <mutators>
+            <mutator>DEFAULTS</mutator>
+          </mutators>
+          <outputFormats>
+            <outputFormat>HTML</outputFormat>
+            <outputFormat>XML</outputFormat>
+          </outputFormats>
+          <timestampedReports>false</timestampedReports>
+        </configuration>
+      </plugin>
+
       <!-- Spring Boot Actuator displays sbom-related information if a CycloneDX SBOM file is
       present at the classpath -->
       <plugin>

@@ -52,8 +52,11 @@ class OwnerController {
 
 	private final OwnerRepository owners;
 
-	public OwnerController(OwnerRepository owners) {
+	private final OwnerRepositoryImpl ownerRepositoryImpl;
+
+	public OwnerController(OwnerRepository owners, OwnerRepositoryImpl ownerRepositoryImpl) {
 		this.owners = owners;
+		this.ownerRepositoryImpl = ownerRepositoryImpl;
 	}
 
 	@InitBinder
@@ -61,6 +64,18 @@ class OwnerController {
 		dataBinder.setDisallowedFields("id");
 	}
 
+	/**
+	 * Finds an owner by ID or returns a new owner if ID is null.
+	 * @param ownerId the owner ID, may be null
+	 * @return an Owner instance, never null
+	 * @throws IllegalArgumentException if ownerId is provided but owner not found
+	 */
+	// @ requires ownerId == null || ownerId > 0;
+	// @ ensures \result != null;
+	// @ ensures ownerId == null ==> \result.isNew();
+	// @ ensures ownerId != null ==> (\result.getId() != null &&
+	// \result.getId().equals(ownerId));
+	// @ ensures ownerId != null ==> !\result.isNew();
 	@ModelAttribute("owner")
 	public Owner findOwner(@PathVariable(name = "ownerId", required = false) Integer ownerId) {
 		return ownerId == null ? new Owner()
@@ -74,6 +89,20 @@ class OwnerController {
 		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 	}
 
+	/**
+	 * Processes the creation form for a new owner.
+	 * @param owner the owner to create, must be valid
+	 * @param result binding result for validation
+	 * @param redirectAttributes attributes for redirect
+	 * @return view name or redirect URL
+	 */
+	// @ requires owner != null;
+	// @ requires result != null;
+	// @ requires redirectAttributes != null;
+	// @ ensures \result != null;
+	// @ ensures result.hasErrors() ==> \result.equals(VIEWS_OWNER_CREATE_OR_UPDATE_FORM);
+	// @ ensures !result.hasErrors() ==> \result.startsWith("redirect:/owners/");
+	// @ ensures !result.hasErrors() ==> !owner.isNew();
 	@PostMapping("/owners/new")
 	public String processCreationForm(@Valid Owner owner, BindingResult result, RedirectAttributes redirectAttributes) {
 		if (result.hasErrors()) {
@@ -91,6 +120,21 @@ class OwnerController {
 		return "owners/findOwners";
 	}
 
+	/**
+	 * Processes the find form to search for owners by last name.
+	 * @param page page number (default 1)
+	 * @param owner owner object containing search criteria
+	 * @param result binding result
+	 * @param model Spring model
+	 * @return view name or redirect URL
+	 */
+	// @ requires page > 0;
+	// @ requires owner != null;
+	// @ requires result != null;
+	// @ requires model != null;
+	// @ ensures \result != null;
+	// @ ensures \result.equals("owners/findOwners") ||
+	// \result.equals("owners/ownersList") || \result.startsWith("redirect:/owners/");
 	@GetMapping("/owners")
 	public String processFindForm(@RequestParam(defaultValue = "1") int page, Owner owner, BindingResult result,
 			Model model) {
@@ -138,6 +182,24 @@ class OwnerController {
 		return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
 	}
 
+	/**
+	 * Processes the update form for an existing owner.
+	 * @param owner the owner with updated values
+	 * @param result binding result for validation
+	 * @param ownerId the owner ID from URL path
+	 * @param redirectAttributes attributes for redirect
+	 * @return view name or redirect URL
+	 */
+	// @ requires owner != null;
+	// @ requires result != null;
+	// @ requires ownerId > 0;
+	// @ requires redirectAttributes != null;
+	// @ ensures \result != null;
+	// @ ensures result.hasErrors() || !Objects.equals(owner.getId(), ownerId) ==>
+	// (\result.equals(VIEWS_OWNER_CREATE_OR_UPDATE_FORM) ||
+	// \result.startsWith("redirect:/owners/"));
+	// @ ensures !result.hasErrors() && Objects.equals(owner.getId(), ownerId) ==>
+	// \result.startsWith("redirect:/owners/");
 	@PostMapping("/owners/{ownerId}/edit")
 	public String processUpdateOwnerForm(@Valid Owner owner, BindingResult result, @PathVariable("ownerId") int ownerId,
 			RedirectAttributes redirectAttributes) {
@@ -163,6 +225,11 @@ class OwnerController {
 	 * @param ownerId the ID of the owner to display
 	 * @return a ModelMap with the model attributes for the view
 	 */
+	// @ requires ownerId > 0;
+	// @ requires this.owners.findById(ownerId).isPresent();
+	// @ ensures \result != null;
+	// @ ensures \result.getViewName().equals("owners/ownerDetails");
+	// @ ensures \result.getModel().containsKey("owner");
 	@GetMapping("/owners/{ownerId}")
 	public ModelAndView showOwner(@PathVariable("ownerId") int ownerId) {
 		ModelAndView mav = new ModelAndView("owners/ownerDetails");
@@ -171,6 +238,67 @@ class OwnerController {
 				"Owner not found with id: " + ownerId + ". Please ensure the ID is correct "));
 		mav.addObject(owner);
 		return mav;
+	}
+
+	/**
+	 * VULNERABLE ENDPOINT - SQL Injection (OWASP A1: Injection)
+	 *
+	 * This endpoint uses a vulnerable repository method that concatenates user input
+	 * directly into SQL queries.
+	 *
+	 * Attack example: /owners/vulnerable/search?lastName=Smith' OR '1'='1
+	 * @param lastName user input that will be concatenated into SQL
+	 * @param model Spring model
+	 * @return view with search results
+	 */
+	@GetMapping("/owners/vulnerable/search")
+	public String vulnerableSearch(@RequestParam(required = false) String lastName, Model model) {
+		if (lastName != null && !lastName.isEmpty()) {
+			// VULNERABLE: Uses repository method with SQL injection vulnerability
+			List<Owner> results = ownerRepositoryImpl.findByLastNameVulnerable(lastName);
+			model.addAttribute("listOwners", results);
+			model.addAttribute("searchTerm", lastName); // Also vulnerable to XSS
+		}
+		return "owners/ownersList";
+	}
+
+	/**
+	 * VULNERABLE ENDPOINT - SQL Injection + XSS (OWASP A1 + A3)
+	 *
+	 * This endpoint is vulnerable to both SQL injection and XSS attacks.
+	 * @param searchTerm user input used in SQL and displayed in HTML
+	 * @param model Spring model
+	 * @return view with search results
+	 */
+	@GetMapping("/owners/vulnerable/searchAll")
+	public String vulnerableSearchAll(@RequestParam(required = false) String searchTerm, Model model) {
+		if (searchTerm != null && !searchTerm.isEmpty()) {
+			// VULNERABLE: SQL Injection
+			List<Owner> results = ownerRepositoryImpl.searchOwnersVulnerable(searchTerm);
+			model.addAttribute("listOwners", results);
+			// VULNERABLE: XSS - user input added directly to model without encoding
+			model.addAttribute("message", "Search results for: " + searchTerm);
+			model.addAttribute("searchTerm", searchTerm);
+		}
+		return "owners/ownersList";
+	}
+
+	/**
+	 * VULNERABLE ENDPOINT - XSS (OWASP A3: Cross-Site Scripting)
+	 *
+	 * This endpoint displays user input without proper encoding.
+	 *
+	 * Attack example: /owners/vulnerable/comment?comment=<script>alert('XSS')</script>
+	 * @param comment user input that will be displayed without encoding
+	 * @param model Spring model
+	 * @return view displaying the comment
+	 */
+	@GetMapping("/owners/vulnerable/comment")
+	public String vulnerableComment(@RequestParam(required = false) String comment, Model model) {
+		// VULNERABLE: User input added directly without encoding
+		model.addAttribute("comment", comment);
+		model.addAttribute("message", "Your comment: " + comment);
+		return "owners/ownersList"; // Reusing view for simplicity
 	}
 
 }

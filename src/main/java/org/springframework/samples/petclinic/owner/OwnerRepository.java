@@ -39,9 +39,14 @@ public interface OwnerRepository extends JpaRepository<Owner, Integer> {
 	 * Retrieve {@link Owner}s from the data store by last name, returning all owners
 	 * whose last name <i>starts</i> with the given name.
 	 * @param lastName Value to search for
-	 * @return a Collection of matching {@link Owner}s (or an empty Collection if none
-	 * found)
+	 * @param pageable pagination information
+	 * @return a Page of matching {@link Owner}s (or an empty Page if none found)
 	 */
+	// @ requires lastName != null;
+	// @ requires pageable != null;
+	// @ ensures \result != null;
+	// @ ensures \result.getContent() != null;
+	// @ pure;
 	Page<Owner> findByLastNameStartingWith(String lastName, Pageable pageable);
 
 	/**
@@ -57,6 +62,12 @@ public interface OwnerRepository extends JpaRepository<Owner, Integer> {
 	 * @throws IllegalArgumentException if the id is null (assuming null is not a valid
 	 * input for id)
 	 */
+	// @ requires id != null;
+	// @ requires id > 0;
+	// @ ensures \result != null;
+	// @ ensures \result.isPresent() ==> (\result.get().getId() != null &&
+	// \result.get().getId().equals(id));
+	// @ pure;
 	Optional<Owner> findById(Integer id);
 
 }

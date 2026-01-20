@@ -102,6 +102,21 @@ class PetController {
 		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 	}
 
+	/**
+	 * Processes the creation form for a new pet.
+	 * @param owner the owner of the pet
+	 * @param pet the pet to create
+	 * @param result binding result for validation
+	 * @param redirectAttributes attributes for redirect
+	 * @return view name or redirect URL
+	 */
+	// @ requires owner != null;
+	// @ requires pet != null;
+	// @ requires result != null;
+	// @ requires redirectAttributes != null;
+	// @ ensures \result != null;
+	// @ ensures result.hasErrors() ==> \result.equals(VIEWS_PETS_CREATE_OR_UPDATE_FORM);
+	// @ ensures !result.hasErrors() ==> \result.startsWith("redirect:/owners/");
 	@PostMapping("/pets/new")
 	public String processCreationForm(Owner owner, @Valid Pet pet, BindingResult result,
 			RedirectAttributes redirectAttributes) {
@@ -129,6 +144,21 @@ class PetController {
 		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 	}
 
+	/**
+	 * Processes the update form for an existing pet.
+	 * @param owner the owner of the pet
+	 * @param pet the pet with updated values
+	 * @param result binding result for validation
+	 * @param redirectAttributes attributes for redirect
+	 * @return view name or redirect URL
+	 */
+	// @ requires owner != null;
+	// @ requires pet != null;
+	// @ requires result != null;
+	// @ requires redirectAttributes != null;
+	// @ ensures \result != null;
+	// @ ensures result.hasErrors() ==> \result.equals(VIEWS_PETS_CREATE_OR_UPDATE_FORM);
+	// @ ensures !result.hasErrors() ==> \result.startsWith("redirect:/owners/");
 	@PostMapping("/pets/{petId}/edit")
 	public String processUpdateForm(Owner owner, @Valid Pet pet, BindingResult result,
 			RedirectAttributes redirectAttributes) {
