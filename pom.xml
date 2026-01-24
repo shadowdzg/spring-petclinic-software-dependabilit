@@ -31,6 +31,7 @@
     <maven-checkstyle.version>3.6.0</maven-checkstyle.version>
     <nohttp-checkstyle.version>0.0.11</nohttp-checkstyle.version>
     <spring-format.version>0.0.47</spring-format.version>
+    <jmh.version>1.37</jmh.version>
   </properties>
 
   <licenses>
@@ -166,10 +167,40 @@
       <artifactId>testcontainers-mysql</artifactId>
       <scope>test</scope>
     </dependency>
+    
+    <!-- JMH Performance Benchmarking Dependencies -->
+    <dependency>
+      <groupId>org.openjdk.jmh</groupId>
+      <artifactId>jmh-core</artifactId>
+      <version>${jmh.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjdk.jmh</groupId>
+      <artifactId>jmh-generator-annprocess</artifactId>
+      <version>${jmh.version}</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>
     <plugins>
+      <!-- Maven Compiler Plugin with JMH Annotation Processor -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.openjdk.jmh</groupId>
+              <artifactId>jmh-generator-annprocess</artifactId>
+              <version>${jmh.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
@@ -326,14 +357,22 @@
             <outputFormat>XML</outputFormat>
           </outputFormats>
           <timestampedReports>false</timestampedReports>
-          <threads>2</threads>
-          <timeoutConstant>20000</timeoutConstant>
+          <threads>1</threads>
+          <timeoutConstant>30000</timeoutConstant>
+          <verbose>true</verbose>
+          <jvmPath>${java.home}/bin/java</jvmPath>
           <jvmArgs>
-            <value>-Xmx1024m</value>
-            <value>-Xms512m</value>
+            <value>-Xmx512m</value>
+            <value>-Xms256m</value>
             <value>--add-opens=java.base/java.lang=ALL-UNNAMED</value>
             <value>--add-opens=java.base/java.util=ALL-UNNAMED</value>
+            <value>-Dfile.encoding=UTF-8</value>
           </jvmArgs>
+          <childJvmArgs>
+            <value>-Xmx512m</value>
+            <value>-Xms256m</value>
+            <value>--add-opens=java.base/java.lang=ALL-UNNAMED</value>
+          </childJvmArgs>
         </configuration>
       </plugin>
 
@@ -343,6 +382,87 @@
         <?m2e ignore?>
         <groupId>org.cyclonedx</groupId>
         <artifactId>cyclonedx-maven-plugin</artifactId>
+      </plugin>
+
+      <!-- Copy test classes to main classes for JMH inclusion in shade -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <id>copy-test-classes</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/classes</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.build.directory}/test-classes</directory>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- JMH Performance Benchmarking Plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.6.0</version>
+        <executions>
+          <execution>
+            <id>benchmark-jar</id>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <finalName>benchmarks</finalName>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>benchmarks</shadedClassifierName>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <!-- Include test classes for benchmarks -->
+              <artifactSet>
+                <includes>
+                  <include>*:*</include>
+                </includes>
+              </artifactSet>
+              <!-- Override the default jar file to include test classes -->
+              <shadedArtifactId>spring-petclinic-benchmarks</shadedArtifactId>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>org.openjdk.jmh.Main</mainClass>
+                </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                  <resource>META-INF/spring.handlers</resource>
+                </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                  <resource>META-INF/spring.schemas</resource>
+                </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                  <resource>META-INF/spring.tooling</resource>
+                </transformer>
+              </transformers>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                    <exclude>META-INF/LICENSE*</exclude>
+                    <exclude>META-INF/NOTICE*</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
@@ -461,6 +581,27 @@
             </plugin>
           </plugins>
         </pluginManagement>
+      </build>
+    </profile>
+    
+    <!-- JMH Performance Benchmark Profile -->
+    <profile>
+      <id>benchmark</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <configuration>
+              <executable>java</executable>
+              <args>
+                <arg>-Djava.awt.headless=true</arg>
+                <arg>-jar</arg>
+                <arg>target/benchmarks.jar</arg>
+              </args>
+            </configuration>
+          </plugin>
+        </plugins>
       </build>
     </profile>
   </profiles>
