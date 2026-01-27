@@ -57,14 +57,14 @@ jobs:
       uses: docker/setup-buildx-action@v3
       
     - name: Build Docker image
-      run: docker-compose build
+      run: docker compose build
       
     - name: Test Docker image
       run: |
-        docker-compose up -d
+        docker compose up -d
         sleep 30
         curl -f http://localhost:8080 || exit 1
-        docker-compose down
+        docker compose down
         
     - name: Docker image info
       run: docker images | grep spring-petclinic
