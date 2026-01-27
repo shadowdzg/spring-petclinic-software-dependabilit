@@ -86,6 +86,9 @@ jobs:
         distribution: 'temurin'
         cache: maven
     
+    - name: Compile code for mutation testing
+      run: ./mvnw clean compile test-compile -DskipTests
+    
     - name: Run PiTest Mutation Testing
       run: ./mvnw org.pitest:pitest-maven:mutationCoverage
     
