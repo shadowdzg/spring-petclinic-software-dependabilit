@@ -30,7 +30,7 @@ jobs:
       run: ./mvnw jacoco:report
     
     - name: Upload Coverage Reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: coverage-reports
         path: target/site/jacoco/
@@ -90,7 +90,7 @@ jobs:
       run: ./mvnw org.pitest:pitest-maven:mutationCoverage
     
     - name: Upload Mutation Reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: mutation-reports
         path: target/pit-reports/
@@ -112,7 +112,7 @@ jobs:
       run: docker save spring-petclinic:${{ github.sha }} > petclinic.tar
     
     - name: Upload Docker Image Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: docker-image
         path: petclinic.tar
