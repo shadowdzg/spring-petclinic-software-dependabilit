@@ -136,21 +136,17 @@ jobs:
         distribution: 'temurin'
         cache: maven
         
-    - name: Run OWASP Dependency Check
-      uses: dependency-check/Dependency-Check_Action@main
-      with:
-        project: 'spring-petclinic'
-        path: '.'
-        format: 'HTML'
-        args: >
-          --failOnCVSS 7
-          --enableRetired
+    - name: Run OWASP Dependency Check with Maven
+      run: |
+        ./mvnw org.owasp:dependency-check-maven:check \
+          -DfailBuildOnCVSS=7 \
+          -DretireJsAnalyzerEnabled=false
           
     - name: Upload security report
       uses: actions/upload-artifact@v4
       with:
         name: security-reports
-        path: reports/
+        path: target/dependency-check-report.html
         retention-days: 30
 
 
