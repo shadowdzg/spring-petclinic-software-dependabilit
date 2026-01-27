@@ -1,5 +1,21 @@
 # GitHub Repository Setup Commands
 
+## Build & Security Status
+
+### CI/CD Pipelines
+![CI/CD with Security Checks](https://github.com/shadowdzg/spring-petclinic-software-dependabilit/actions/workflows/ci-security.yml/badge.svg)
+![CI/CD Pipeline](https://github.com/shadowdzg/spring-petclinic-software-dependabilit/actions/workflows/ci-cd.yml/badge.svg)
+![Maven Build](https://github.com/shadowdzg/spring-petclinic-software-dependabilit/actions/workflows/maven-build.yml/badge.svg)
+
+### Security Scans (with logos)
+[![Snyk Security](https://snyk.io/test/github/shadowdzg/spring-petclinic-software-dependabilit/badge.svg)](https://snyk.io/test/github/shadowdzg/spring-petclinic-software-dependabilit)
+[![SonarQube](https://sonarcloud.io/api/project_badges/measure?project=YOUR_SONAR_PROJECT_KEY&metric=alert_status)](https://sonarcloud.io/dashboard?id=YOUR_SONAR_PROJECT_KEY)
+[![GitGuardian](https://api.gitguardian.com/v1/badges/YOUR_WORKSPACE_ID/public_repositories/YOUR_REPO_ID)](https://dashboard.gitguardian.com)
+
+> **Note**: Replace `YOUR_SONAR_PROJECT_KEY`, `YOUR_WORKSPACE_ID`, and `YOUR_REPO_ID` with actual values from your SonarQube and GitGuardian dashboards.
+
+---
+
 After creating your new GitHub repository, run these commands:
 
 ## Replace YOUR_USERNAME with your actual GitHub username:
