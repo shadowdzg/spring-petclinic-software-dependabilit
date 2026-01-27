@@ -113,22 +113,34 @@ The critical vulnerabilities were successfully remediated by upgrading `org.apac
 
 SonarQube identified **4 security blocker issues** in the codebase, all of which have been remediated:
 
-**SQL Injection Vulnerabilities (CWE-89) - FIXED:**
+**1. SQL Injection Vulnerabilities (CWE-89 | OWASP A03:2021 - Injection) - FIXED:**
 - `OwnerRepositoryImpl.java` Line 41 - SQL query construction from user-controlled data
+  - **Vulnerability Type:** SQL Injection (CWE-89)
+  - **OWASP Category:** A03:2021 - Injection
+  - **Severity:** Blocker/Critical
   - **Remediation:** Replaced string concatenation with parameterized queries using `setParameter()`
   - **Code Change:** `SELECT * FROM owners WHERE last_name = :lastName` with `query.setParameter("lastName", lastName)`
   
 - `OwnerRepositoryImpl.java` Line 55 - SQL query construction from user-controlled data
+  - **Vulnerability Type:** SQL Injection (CWE-89)
+  - **OWASP Category:** A03:2021 - Injection
+  - **Severity:** Blocker/Critical
   - **Remediation:** Implemented parameterized LIKE queries with named parameters
   - **Code Change:** `SELECT * FROM owners WHERE first_name LIKE :searchPattern` with `query.setParameter("searchPattern", "%" + searchTerm + "%")`
 
-**Open Redirect Vulnerability (CWE-601) - FIXED:**
+**2. Open Redirect Vulnerability (CWE-601 | OWASP A01:2021 - Broken Access Control) - FIXED:**
 - `CrashController.java` Line 54 - Unvalidated redirect based on user input
+  - **Vulnerability Type:** Unvalidated Redirects and Forwards (CWE-601)
+  - **OWASP Category:** A01:2021 - Broken Access Control
+  - **Severity:** Blocker/High
   - **Remediation:** Added URL validation method `isAllowedRedirectUrl()` that restricts redirects to relative URLs or trusted localhost domains
   - **Code Change:** Implemented allowlist validation before creating RedirectView, defaulting to safe "/" location if URL is untrusted
 
-**Hardcoded Database Password (CWE-798) - FIXED:**
-- Database password exposed in error messages and model attributes
+**3. Hardcoded Database Password (CWE-798 | OWASP A02:2021 - Cryptographic Failures) - FIXED:**
+- `CrashController.java` Line 71-80 - Database credentials exposed in error messages and model attributes
+  - **Vulnerability Type:** Use of Hard-coded Password (CWE-798)
+  - **OWASP Category:** A02:2021 - Cryptographic Failures / A04:2021 - Insecure Design
+  - **Severity:** Blocker/Critical
   - **Remediation:** Removed all sensitive data from exception messages and model attributes
   - **Code Change:** Replaced detailed error messages containing database credentials with generic "An error occurred" message, removed `databasePassword`, `databaseUrl`, `databaseUser`, and stack trace exposure from model
 
@@ -137,6 +149,11 @@ SonarQube identified **4 security blocker issues** in the codebase, all of which
 - Redirect URLs are validated against an allowlist to prevent phishing
 - Sensitive information is no longer exposed in error messages
 - Generic error handling prevents information disclosure
+
+**OWASP Top 10 Coverage:**
+- ✅ A01:2021 - Broken Access Control (Open Redirect fixed)
+- ✅ A02:2021 - Cryptographic Failures (Hardcoded credentials removed)
+- ✅ A03:2021 - Injection (SQL Injection fixed)
 
 All fixes maintain backward compatibility while eliminating critical security vulnerabilities identified by SonarQube.
 
