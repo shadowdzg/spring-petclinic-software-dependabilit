@@ -111,22 +111,34 @@ The critical vulnerabilities were successfully remediated by upgrading `org.apac
 
 ## 10. Static Code Analysis with SonarQube
 
-SonarQube identified **4 security blocker issues** in the codebase:
+SonarQube identified **4 security blocker issues** in the codebase, all of which have been remediated:
 
-**SQL Injection Vulnerabilities (CWE-89):**
+**SQL Injection Vulnerabilities (CWE-89) - FIXED:**
 - `OwnerRepositoryImpl.java` Line 41 - SQL query construction from user-controlled data
+  - **Remediation:** Replaced string concatenation with parameterized queries using `setParameter()`
+  - **Code Change:** `SELECT * FROM owners WHERE last_name = :lastName` with `query.setParameter("lastName", lastName)`
+  
 - `OwnerRepositoryImpl.java` Line 55 - SQL query construction from user-controlled data
-- Fix: Use parameterized queries or prepared statements
+  - **Remediation:** Implemented parameterized LIKE queries with named parameters
+  - **Code Change:** `SELECT * FROM owners WHERE first_name LIKE :searchPattern` with `query.setParameter("searchPattern", "%" + searchTerm + "%")`
 
-**Open Redirect Vulnerability (CWE-601):**
+**Open Redirect Vulnerability (CWE-601) - FIXED:**
 - `CrashController.java` Line 54 - Unvalidated redirect based on user input
-- Fix: Validate redirect URLs against allowlist
+  - **Remediation:** Added URL validation method `isAllowedRedirectUrl()` that restricts redirects to relative URLs or trusted localhost domains
+  - **Code Change:** Implemented allowlist validation before creating RedirectView, defaulting to safe "/" location if URL is untrusted
 
-**Hardcoded Database Password (CWE-798):**
-- Database password exposed in code
-- Fix: Remove hardcoded credentials and use environment variables or secrets management
+**Hardcoded Database Password (CWE-798) - FIXED:**
+- Database password exposed in error messages and model attributes
+  - **Remediation:** Removed all sensitive data from exception messages and model attributes
+  - **Code Change:** Replaced detailed error messages containing database credentials with generic "An error occurred" message, removed `databasePassword`, `databaseUrl`, `databaseUser`, and stack trace exposure from model
 
-All issues are flagged as intentional security demonstrations and require code changes to remediate.
+**Security Improvements Applied:**
+- All SQL queries now use parameterized statements to prevent injection attacks
+- Redirect URLs are validated against an allowlist to prevent phishing
+- Sensitive information is no longer exposed in error messages
+- Generic error handling prevents information disclosure
+
+All fixes maintain backward compatibility while eliminating critical security vulnerabilities identified by SonarQube.
 
 ## 11. CI/CD Security Integration with GitHub Actions
 

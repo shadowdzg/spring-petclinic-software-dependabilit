@@ -27,32 +27,32 @@ public class OwnerRepositoryImpl {
 	private EntityManager entityManager;
 
 	/**
-	 * VULNERABLE METHOD - SQL Injection
+	 * SECURE METHOD - SQL Injection Fixed
 	 *
-	 * This method is vulnerable because it concatenates user input directly into the SQL
-	 * query without parameterization.
-	 * @param lastName user input that is directly concatenated into SQL
+	 * This method now uses parameterized queries to prevent SQL injection.
+	 * @param lastName user input that is safely parameterized
 	 * @return list of owners matching the last name
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Owner> findByLastNameVulnerable(String lastName) {
-		// VULNERABLE: Direct string concatenation - allows SQL injection
-		String sql = "SELECT * FROM owners WHERE last_name = '" + lastName + "'";
+		// SECURE: Using parameterized query to prevent SQL injection
+		String sql = "SELECT * FROM owners WHERE last_name = :lastName";
 		Query query = entityManager.createNativeQuery(sql, Owner.class);
+		query.setParameter("lastName", lastName);
 		return query.getResultList();
 	}
 
 	/**
-	 * VULNERABLE METHOD - SQL Injection with LIKE
-	 * @param searchTerm user input that is directly concatenated into SQL
+	 * SECURE METHOD - SQL Injection with LIKE Fixed
+	 * @param searchTerm user input that is safely parameterized
 	 * @return list of owners matching the search term
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Owner> searchOwnersVulnerable(String searchTerm) {
-		// VULNERABLE: Direct string concatenation in LIKE clause
-		String sql = "SELECT * FROM owners WHERE first_name LIKE '%" + searchTerm + "%' OR last_name LIKE '%"
-				+ searchTerm + "%' OR city LIKE '%" + searchTerm + "%'";
+		// SECURE: Using parameterized query to prevent SQL injection
+		String sql = "SELECT * FROM owners WHERE first_name LIKE :searchPattern OR last_name LIKE :searchPattern OR city LIKE :searchPattern";
 		Query query = entityManager.createNativeQuery(sql, Owner.class);
+		query.setParameter("searchPattern", "%" + searchTerm + "%");
 		return query.getResultList();
 	}
 

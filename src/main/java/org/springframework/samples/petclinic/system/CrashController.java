@@ -39,19 +39,27 @@ class CrashController {
 	}
 
 	/**
-	 * VULNERABLE ENDPOINT - Unvalidated Redirects and Forwards (OWASP A10)
+	 * SECURE ENDPOINT - Validated Redirects (OWASP A10 Fixed)
 	 *
-	 * This endpoint redirects to a URL provided by the user without validation. This can
-	 * be used for phishing attacks.
+	 * This endpoint now validates redirect URLs against an allowlist to prevent phishing.
 	 *
-	 * Attack example: /redirect?url=https://evil.com
 	 * @param url user-provided URL to redirect to
-	 * @return redirect view
+	 * @return redirect view or error if URL is not allowed
 	 */
 	@GetMapping("/redirect")
 	public RedirectView vulnerableRedirect(@RequestParam("url") String url) {
-		// VULNERABLE: No validation of the redirect URL
-		return new RedirectView(url);
+		// SECURE: Validate redirect URL against allowlist
+		if (isAllowedRedirectUrl(url)) {
+			return new RedirectView(url);
+		}
+		// Default to safe location if URL is not allowed
+		return new RedirectView("/");
+	}
+
+	private boolean isAllowedRedirectUrl(String url) {
+		// Only allow relative URLs or URLs from trusted domains
+		return url.startsWith("/") || url.startsWith("./") || 
+		       url.matches("^https?://(localhost|127\\.0\\.0\\.1)(:[0-9]+)?/.*$");
 	}
 
 	/**
@@ -67,17 +75,13 @@ class CrashController {
 		try {
 			// Simulate database error
 			if (ownerId == null) {
-				throw new RuntimeException(
-						"Database connection failed: jdbc:mysql://localhost:3306/petclinic?user=root&password=secret123");
+				throw new RuntimeException("Database connection failed");
 			}
 		}
 		catch (Exception e) {
-			// VULNERABLE: Exposing sensitive information in error messages
-			model.addAttribute("error", e.getMessage());
-			model.addAttribute("stackTrace", e.getStackTrace());
-			model.addAttribute("databaseUrl", "jdbc:mysql://localhost:3306/petclinic");
-			model.addAttribute("databaseUser", "root");
-			model.addAttribute("databasePassword", "secret123"); // NEVER DO THIS!
+			// SECURE: Generic error message without sensitive information
+			model.addAttribute("error", "An error occurred. Please contact support.");
+			// Do not expose stack traces, database URLs, or credentials
 		}
 		return "error";
 	}
