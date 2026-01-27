@@ -13,6 +13,22 @@ The application is fully buildable both in Continuous Integration/Continuous Dep
 
 Core methods of the application include formal specifications written in Java Modeling Language (JML). These specifications define preconditions, postconditions, and invariants that mathematically verify the correctness of critical code paths. OpenJML is integrated into the Docker build process as an optional verification step, ensuring that the implementation adheres to its formal contracts.
 
+**Key JML Annotations Used:**
+- `//@ requires` - Preconditions that must be true before method execution (e.g., `requires pet != null`)
+- `//@ ensures` - Postconditions guaranteeing the method's result (e.g., `ensures getPets().contains(pet)`)
+- `//@ pure` - Indicates a read-only method with no side effects
+- `\result` - References the return value in postconditions
+- `\old(expr)` - References the value of an expression before method execution for comparison
+
+**Example from Owner.java:**
+```java
+//@ requires pet != null;
+//@ requires pet.isNew();
+//@ ensures getPets().contains(pet);
+//@ ensures getPets().size() == \old(getPets().size()) + 1;
+public void addPet(Pet pet) { ... }
+```
+
 **Verification Status:** OpenJML verification can be enabled during Docker builds by setting `ENABLE_OPENJML=true` in docker-compose.yml.
 
 ## 3. Docker Image and Container Orchestration
@@ -190,6 +206,26 @@ This implementation establishes a "shift-left" security approach, identifying an
 
 ---
 
-## Summary
+## Conclusion
 
-This project implements comprehensive software quality assurance practices covering build automation, formal verification, containerization, testing, coverage analysis, mutation testing, and performance benchmarking. Together, these practices ensure the application meets high standards for dependability, reliability, and performance.
+Through this Spring PetClinic project, I've identified and addressed key areas to make the application stronger, more secure, and more reliable, gaining hands-on experience with industry-standard tools and practices for software dependability.
+
+**Security Engineering:**
+Using SonarQube, Snyk, and GitGuardian, I uncovered and fixed 7 critical vulnerabilities: SQL injection flaws (CWE-89) by implementing parameterized queries, an open redirect (CWE-601) through URL validation, hardcoded credentials (CWE-798) in error messages, and dependency issues including deserialization risks (CWE-502) and configuration vulnerabilities (CWE-454). The application now achieves OWASP Top 10 compliance for A01, A02, and A03 categories.
+
+**Code Quality and Testing:**
+I achieved 84% line coverage and 99% method coverage using JaCoCo, with 64 passing tests across unit, integration, and controller layers. Beyond coverage, PiTest mutation testing with 85% mutation score (23/27 mutations killed) validated that my tests effectively detect bugs, not just execute code.
+
+**Containerization:**
+I created a production-ready Docker image with multi-stage builds, encapsulating all dependencies and configurations. Docker Compose orchestration supports MySQL and PostgreSQL backends with health checks and volume persistence for consistent deployments.
+
+**Performance:**
+JMeter load testing validated production-level capability: 546 requests/second sustained throughput, 99.96% success rate across 65,000 requests, and 508ms average response time under 500 concurrent users.
+
+**CI/CD Automation:**
+I implemented a GitHub Actions pipeline that automatically enforces security checks, runs tests, performs mutation testing, and builds Docker images on every commit, catching vulnerabilities during development rather than post-deployment.
+
+**Formal Verification:**
+JML specifications integrated with OpenJML provide mathematical verification of critical methods through preconditions, postconditions, and invariants.
+
+By leveraging these tools, I've improved the application's security, quality, and reliability while gaining practical experience with professional software engineering practices. This journey demonstrates that software dependability requires integrating security, testing, performance validation, and automation to create robust, production-ready software.

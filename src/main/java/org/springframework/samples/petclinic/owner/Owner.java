@@ -99,10 +99,10 @@ public class Owner extends Person {
 	 * yet persisted).
 	 * @param pet the pet to add, must not be null
 	 */
-	// @ requires pet != null;
-	// @ requires pet.isNew();
-	// @ ensures getPets().contains(pet);
-	// @ ensures getPets().size() == \old(getPets().size()) + 1;
+	//@ requires pet != null;
+	//@ requires pet.isNew();
+	//@ ensures getPets().contains(pet);
+	//@ ensures getPets().size() == \old(getPets().size()) + 1;
 	public void addPet(Pet pet) {
 		if (pet.isNew()) {
 			getPets().add(pet);
@@ -114,10 +114,10 @@ public class Owner extends Person {
 	 * @param name to test
 	 * @return the Pet with the given name, or null if no such Pet exists for this Owner
 	 */
-	// @ requires name == null || name.length() > 0;
-	// @ ensures \result == null || (\result.getName() != null &&
-	// \result.getName().equalsIgnoreCase(name));
-	// @ pure;
+	//@ requires name == null || name.length() > 0;
+	//@ ensures \result == null || (\result.getName() != null &&
+	//@ \result.getName().equalsIgnoreCase(name));
+	//@ pure;
 	public Pet getPet(String name) {
 		return getPet(name, false);
 	}
@@ -128,11 +128,11 @@ public class Owner extends Person {
 	 * @param id to test
 	 * @return the Pet with the given id, or null if no such Pet exists for this Owner
 	 */
-	// @ requires id == null || id > 0;
-	// @ ensures \result == null || (\result.getId() != null &&
-	// \result.getId().equals(id));
-	// @ ensures \result == null || !\result.isNew();
-	// @ pure;
+	//@ requires id == null || id > 0;
+	//@ ensures \result == null || (\result.getId() != null &&
+	//@ \result.getId().equals(id));
+	//@ ensures \result == null || !\result.isNew();
+	//@ pure;
 	public Pet getPet(Integer id) {
 		for (Pet pet : getPets()) {
 			if (!pet.isNew()) {
@@ -151,11 +151,11 @@ public class Owner extends Person {
 	 * @param ignoreNew whether to ignore new pets (pets that are not saved yet)
 	 * @return the Pet with the given name, or null if no such Pet exists for this Owner
 	 */
-	// @ requires name == null || name.length() > 0;
-	// @ ensures \result == null || (\result.getName() != null &&
-	// \result.getName().equalsIgnoreCase(name));
-	// @ ensures \result == null || !ignoreNew || !\result.isNew();
-	// @ pure;
+	//@ requires name == null || name.length() > 0;
+	//@ ensures \result == null || (\result.getName() != null &&
+	//@ \result.getName().equalsIgnoreCase(name));
+	//@ ensures \result == null || !ignoreNew || !\result.isNew();
+	//@ pure;
 	public Pet getPet(String name, boolean ignoreNew) {
 		for (Pet pet : getPets()) {
 			String compName = pet.getName();
@@ -185,13 +185,13 @@ public class Owner extends Person {
 	 * @param petId the identifier of the {@link Pet}, must not be {@literal null}.
 	 * @param visit the visit to add, must not be {@literal null}.
 	 */
-	// @ requires petId != null;
-	// @ requires petId > 0;
-	// @ requires visit != null;
-	// @ requires getPet(petId) != null;
-	// @ ensures getPet(petId).getVisits().contains(visit);
-	// @ ensures getPet(petId).getVisits().size() ==
-	// \old(getPet(petId).getVisits().size()) + 1;
+	//@ requires petId != null;
+	//@ requires petId > 0;
+	//@ requires visit != null;
+	//@ requires getPet(petId) != null;
+	//@ ensures getPet(petId).getVisits().contains(visit);
+	//@ ensures getPet(petId).getVisits().size() ==
+	//@ \old(getPet(petId).getVisits().size()) + 1;
 	public void addVisit(Integer petId, Visit visit) {
 
 		Assert.notNull(petId, "Pet identifier must not be null!");
