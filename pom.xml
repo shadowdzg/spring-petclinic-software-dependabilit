@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>4.0.0</version>
+    <version>4.0.2</version>
   </parent>
   <groupId>org.springframework.samples</groupId>
   <artifactId>spring-petclinic</artifactId>
@@ -117,13 +117,12 @@
     </dependency>
 
     <!-- VULNERABILITY: Using Components with Known Vulnerabilities (OWASP A9) -->
-    <!-- This is an old version of Apache Commons Collections with known CVEs -->
-    <!-- CVE-2015-6420, CVE-2017-15708: Remote code execution vulnerabilities -->
-    <!-- In production, this should be updated to version 4.4 or later -->
+    <!-- Apache Commons Collections upgraded to fix deserialization vulnerabilities -->
+    <!-- Fixed CVE-2015-6420, CVE-2017-15708: Remote code execution vulnerabilities -->
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-collections4</artifactId>
-      <version>4.0</version>
+      <version>4.1</version>
     </dependency>
 
     <dependency>
