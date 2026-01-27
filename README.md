@@ -1,4 +1,12 @@
-# Spring PetClinic Sample Application [![Build Status](https://github.com/spring-projects/spring-petclinic/actions/workflows/maven-build.yml/badge.svg)](https://github.com/spring-projects/spring-petclinic/actions/workflows/maven-build.yml)[![Build Status](https://github.com/spring-projects/spring-petclinic/actions/workflows/gradle-build.yml/badge.svg)](https://github.com/spring-projects/spring-petclinic/actions/workflows/gradle-build.yml)
+# Spring PetClinic Sample Application
+
+![CI/CD with Security Checks](https://github.com/shadowdzg/spring-petclinic-software-dependabilit/actions/workflows/ci-security.yml/badge.svg)
+![CI/CD Pipeline](https://github.com/shadowdzg/spring-petclinic-software-dependabilit/actions/workflows/ci-cd.yml/badge.svg)
+![Maven Build](https://github.com/shadowdzg/spring-petclinic-software-dependabilit/actions/workflows/maven-build.yml/badge.svg)
+
+[![Snyk](https://img.shields.io/badge/Snyk-Security-4C4A73?logo=snyk)](https://snyk.io)
+[![SonarQube](https://img.shields.io/badge/SonarQube-Quality-4E9BCD?logo=sonarqube)](https://sonarcloud.io)
+[![GitGuardian](https://img.shields.io/badge/GitGuardian-Secrets-191970?logo=git)](https://gitguardian.com)
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/spring-projects/spring-petclinic) [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=7517918)
 
