@@ -42,7 +42,6 @@ class CrashController {
 	 * SECURE ENDPOINT - Validated Redirects (OWASP A10 Fixed)
 	 *
 	 * This endpoint now validates redirect URLs against an allowlist to prevent phishing.
-	 *
 	 * @param url user-provided URL to redirect to
 	 * @return redirect view or error if URL is not allowed
 	 */
@@ -58,8 +57,8 @@ class CrashController {
 
 	private boolean isAllowedRedirectUrl(String url) {
 		// Only allow relative URLs or URLs from trusted domains
-		return url.startsWith("/") || url.startsWith("./") || 
-		       url.matches("^https?://(localhost|127\\.0\\.0\\.1)(:[0-9]+)?/.*$");
+		return url.startsWith("/") || url.startsWith("./")
+				|| url.matches("^https?://(localhost|127\\.0\\.0\\.1)(:[0-9]+)?/.*$");
 	}
 
 	/**
